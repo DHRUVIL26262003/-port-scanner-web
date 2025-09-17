@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Results - Port Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border-left: 5px solid #667eea;
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .card .label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+
+        .ports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .port-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+            transition: all 0.3s ease;
+        }
+
+        .port-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .port-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .port-number {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .service-name {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .banner {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #495057;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+
+        .web-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .web-info h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .web-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .web-detail {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .web-detail strong {
+            color: #333;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .no-ports {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .no-ports h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .export-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .ports-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-btn">← Back to Scanner</a>
+            <h1>🔍 Scan Results</h1>
+            <p id="targetInfo">Loading scan results...</p>
+        </div>
+        
+        <div class="content">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Loading scan results...</p>
+            </div>
+            
+            <div id="error" class="error" style="display: none;">
+                <h3>Error Loading Results</h3>
+                <p id="errorMessage"></p>
+            </div>
+            
+            <div id="results" style="display: none;">
+                <button class="export-btn" onclick="exportResults()">📊 Export Results</button>
+                
+                <div class="summary-cards">
+                    <div class="card">
+                        <div class="number" id="totalPorts">0</div>
+                        <div class="label">Open Ports</div>
+                    </div>
+                    <div class="card">
+                        <div class="number" id="scanDuration">0s</div>
+                        <div class="label">Scan Duration</div>
+                    </div>
+                    <div class="card">
+                        <div class="number" id="commonServices">0</div>
+                        <div class="label">Common Services</div>
+                    </div>
+                    <div class="card">
+                        <div class="number" id="webServices">0</div>
+                        <div class="label">Web Services</div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Open Ports & Services</h2>
+                    <div id="portsContainer">
+                        <div class="no-ports">
+                            <h3>No Open Ports Found</h3>
+                            <p>All scanned ports appear to be closed or filtered.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scanId = '{{ scan_id }}';
+        let scanData = null;
+
+        async function loadResults() {
+            try {
+                const response = await fetch(`/results/${scanId}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                
+                scanData = data;
+                displayResults(data);
+                
+            } catch (error) {
+                showError('Failed to load scan results: ' + error.message);
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            // Update header
+            document.getElementById('targetInfo').textContent = 
+                `Target: ${data.domain || data.target} | Scanned: ${data.scan_time}`;
+            
+            // Update summary cards
+            document.getElementById('totalPorts').textContent = data.summary.total_open_ports;
+            document.getElementById('scanDuration').textContent = data.duration + 's';
+            document.getElementById('commonServices').textContent = data.summary.common_services.length;
+            
+            const webServices = data.open_ports.filter(port => 
+                [80, 443, 8080, 8443, 8000, 8001, 8008, 8081, 8082, 8083, 8084, 8085, 8086, 8087, 8088, 8089, 8090, 9090, 9443, 9999, 10000].includes(port)
+            ).length;
+            document.getElementById('webServices').textContent = webServices;
+            
+            // Display ports
+            displayPorts(data);
+        }
+
+        function displayPorts(data) {
+            const container = document.getElementById('portsContainer');
+            
+            if (data.open_ports.length === 0) {
+                container.innerHTML = `
+                    <div class="no-ports">
+                        <h3>No Open Ports Found</h3>
+                        <p>All scanned ports appear to be closed or filtered.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '<div class="ports-grid"></div>';
+            const grid = container.querySelector('.ports-grid');
+            
+            data.open_ports.forEach(port => {
+                const service = data.services[port] || 'Unknown';
+                const banner = data.banners[port];
+                const webInfo = data.web_info[port];
+                
+                const portElement = document.createElement('div');
+                portElement.className = 'port-item';
+                
+                let html = `
+                    <div class="port-header">
+                        <span class="port-number">Port ${port}</span>
+                        <span class="service-name">${service}</span>
+                    </div>
+                `;
+                
+                if (banner) {
+                    html += `
+                        <div class="banner">
+                            <strong>Banner:</strong> ${banner}
+                        </div>
+                    `;
+                }
+                
+                if (webInfo) {
+                    html += `
+                        <div class="web-info">
+                            <h4>🌐 Web Service Information</h4>
+                            <div class="web-details">
+                                <div class="web-detail">
+                                    <strong>URL:</strong> ${webInfo.url}
+                                </div>
+                                <div class="web-detail">
+                                    <strong>Status:</strong> ${webInfo.status_code}
+                                </div>
+                                <div class="web-detail">
+                                    <strong>Server:</strong> ${webInfo.server || 'Unknown'}
+                                </div>
+                                <div class="web-detail">
+                                    <strong>Title:</strong> ${webInfo.title || 'No title'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                portElement.innerHTML = html;
+                grid.appendChild(portElement);
+            });
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        function exportResults() {
+            if (!scanData) return;
+            
+            const dataStr = JSON.stringify(scanData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `port_scan_${scanData.target}_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        // Load results when page loads
+        document.addEventListener('DOMContentLoaded', loadResults);
+    </script>
+</body>
+</html>
